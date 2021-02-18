@@ -25,6 +25,10 @@ public class TransferRepository {
     transferMap.remove(operationId);
   }
 
+  public boolean contains(String operationId) {
+    return transferMap.containsKey(operationId);
+  }
+
   public Optional<Transfer> get(String operationId) {
     return Optional.ofNullable(transferMap.get(operationId));
   }

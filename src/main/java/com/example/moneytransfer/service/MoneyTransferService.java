@@ -7,12 +7,12 @@ import com.example.moneytransfer.objects.responses.FailTransferResponse;
 import com.example.moneytransfer.objects.responses.GoodTransferResponse;
 import com.example.moneytransfer.repository.TransferRepository;
 import lombok.extern.java.Log;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import com.example.moneytransfer.commons.Luhn;
 
-import java.math.BigDecimal;
 import java.math.BigInteger;
 
 @Log
@@ -50,12 +50,15 @@ public class MoneyTransferService {
     if (confirmOperationRequest == null)
       return ResponseEntity.badRequest().body(FailTransferResponse.builder().message(MSG_INPUT_NOT_VALID).build());
 
-    Transfer transfer = transferRepository.get(confirmOperationRequest.getOperationId()).orElseThrow(() -> new RuntimeException(MSG_CONFIRM_FAIL));
-    String operationId = transfer.getOperationId();
-    transferRepository.remove(operationId);
-    log.info("TRANSFER ACCEPTED: OPERATION_ID = " + operationId);
+    String operationId = confirmOperationRequest.getOperationId();
 
-    return ResponseEntity.ok(GoodTransferResponse.builder().operationId(operationId).build());
+    if (transferRepository.contains(operationId)) {
+      transferRepository.remove(operationId);
+      log.info("TRANSFER ACCEPTED: OPERATION_ID = " + operationId + ", CODE = " + confirmOperationRequest.getCode());
+      return ResponseEntity.ok(GoodTransferResponse.builder().operationId(operationId).build());
+    } else {
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(FailTransferResponse.builder().message(MSG_CONFIRM_FAIL));
+    }
   }
 
 }
