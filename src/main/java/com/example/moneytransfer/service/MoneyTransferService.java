@@ -6,19 +6,24 @@ import com.example.moneytransfer.objects.requests.TransferRequest;
 import com.example.moneytransfer.objects.responses.FailTransferResponse;
 import com.example.moneytransfer.objects.responses.GoodTransferResponse;
 import com.example.moneytransfer.repository.TransferRepository;
+import lombok.extern.java.Log;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import com.example.moneytransfer.commons.Luhn;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
+
+@Log
 @Service
 public class MoneyTransferService {
 
-  private final String MSG_FROM_CARD_NOT_VALID = "From card number not valid";
-  private final String MSG_TO_CARD_NOT_VALID = "To card number not valid";
-  private final String MSG_AMOUNT_NOT_VALID = "Amount value not valid";
-  private final String MSG_INPUT_NOT_VALID = "Input data not valid";
-  private final String MSG_CONFIRM_FAIL = "Confirm data is lost";
+  private final String MSG_FROM_CARD_NOT_VALID = "Ваша карта недействительна, проверьте введённый номер!";
+  private final String MSG_TO_CARD_NOT_VALID = "Карта получателя недействительна, проверьте введённый номер!";
+  private final String MSG_AMOUNT_NOT_VALID = "Отсутствую данные о переводе!";
+  private final String MSG_INPUT_NOT_VALID = "Неверные входные данные!";
+  private final String MSG_CONFIRM_FAIL = "Ошибка данных, транзакции не существует!";
 
   private final TransferRepository transferRepository;
 
@@ -33,10 +38,11 @@ public class MoneyTransferService {
       return ResponseEntity.badRequest().body(FailTransferResponse.builder().message(MSG_FROM_CARD_NOT_VALID).build());
     if (!Luhn.check(transferRequest.getCardToNumber()))
       return ResponseEntity.badRequest().body(FailTransferResponse.builder().message(MSG_TO_CARD_NOT_VALID).build());
-    if (transferRequest.getAmount().getValue() <= 0)
+    if (transferRequest.getAmount().getValue().compareTo(BigInteger.ZERO) <= 0)
       return ResponseEntity.badRequest().body(FailTransferResponse.builder().message(MSG_AMOUNT_NOT_VALID).build());
 
     String operationId = transferRepository.add(Transfer.builder().transferRequest(transferRequest).build());
+    log.info("NEW TRANSFER: " + transferRepository.get(operationId).orElseThrow(() -> new RuntimeException(MSG_CONFIRM_FAIL)).getLog());
     return ResponseEntity.ok(GoodTransferResponse.builder().operationId(operationId).build());
   }
 
@@ -47,6 +53,7 @@ public class MoneyTransferService {
     Transfer transfer = transferRepository.get(confirmOperationRequest.getOperationId()).orElseThrow(() -> new RuntimeException(MSG_CONFIRM_FAIL));
     String operationId = transfer.getOperationId();
     transferRepository.remove(operationId);
+    log.info("TRANSFER ACCEPTED: OPERATION_ID = " + operationId);
 
     return ResponseEntity.ok(GoodTransferResponse.builder().operationId(operationId).build());
   }

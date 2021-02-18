@@ -5,6 +5,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigInteger;
+
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
@@ -22,7 +24,7 @@ public class TransferRequest {
   @Data
   public static class Amount {
     private String currency;
-    private int value;
+    private BigInteger value;
   }
 }
 
