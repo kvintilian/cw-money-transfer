@@ -10,8 +10,8 @@
         <module name="moneytransfer" />
       </profile>
     </annotationProcessing>
-    <bytecodeTargetLevel>
-      <module name="moneytransfer" target="11" />
+    <bytecodeTargetLevel target="11">
+      <module name="moneytransfer" target="14" />
     </bytecodeTargetLevel>
   </component>
   <component name="JavacSettings">
