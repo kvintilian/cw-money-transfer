@@ -34,9 +34,9 @@ public class MoneyTransferService {
   public ResponseEntity<Object> transfer(TransferRequest transferRequest) {
     if (transferRequest == null)
       return ResponseEntity.badRequest().body(FailTransferResponse.builder().message(MSG_INPUT_NOT_VALID).build());
-    if (!Luhn.check(transferRequest.getCardFromNumber()))
+    if (!Luhn.checkCardNumber(transferRequest.getCardFromNumber()))
       return ResponseEntity.badRequest().body(FailTransferResponse.builder().message(MSG_FROM_CARD_NOT_VALID).build());
-    if (!Luhn.check(transferRequest.getCardToNumber()))
+    if (!Luhn.checkCardNumber(transferRequest.getCardToNumber()))
       return ResponseEntity.badRequest().body(FailTransferResponse.builder().message(MSG_TO_CARD_NOT_VALID).build());
     if (transferRequest.getAmount().getValue().compareTo(BigInteger.ZERO) <= 0)
       return ResponseEntity.badRequest().body(FailTransferResponse.builder().message(MSG_AMOUNT_NOT_VALID).build());

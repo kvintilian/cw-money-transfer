@@ -1,7 +1,7 @@
 package com.example.moneytransfer.commons;
 
 public class Luhn {
-  public static boolean check(String ccNumber) {
+  public static boolean checkCardNumber(String ccNumber) {
     if (ccNumber == null) return false;
     int sum = 0;
     boolean alternate = false;
